@@ -1,0 +1,7 @@
+[package]
+name = "hours_check"
+type = "bin"
+authors = ["audit-core"]
+compiler_version = ">=0.1.0"
+
+[dependencies]
