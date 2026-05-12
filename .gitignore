@@ -1,0 +1,12 @@
+config.env
+circuits/*/proofs/
+circuits/*/target/
+__pycache__/
+*.pyc
+.env
+node_modules/
+.venv
+build/
+dist/
+wheels/
+*.egg-info
