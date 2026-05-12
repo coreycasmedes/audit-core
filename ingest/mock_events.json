@@ -1,0 +1,428 @@
+[
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE1",
+      "arn": "arn:aws:iam::123456789012:user/jane.chen@acme.com",
+      "accountId": "123456789012",
+      "accessKeyId": "",
+      "userName": "jane.chen@acme.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "true",
+          "creationDate": "2026-05-06T10:00:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-05-06T10:15:32Z",
+    "eventSource": "signin.amazonaws.com",
+    "eventName": "ConsoleLogin",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "203.0.113.42",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "requestParameters": null,
+    "responseElements": { "ConsoleLogin": "Success" },
+    "additionalEventData": {
+      "LoginTo": "https://console.aws.amazon.com/console/home",
+      "MobileVersion": "No",
+      "MFAUsed": "Yes",
+      "MFAIdentifier": "arn:aws:iam::123456789012:u2f/jane.chen@acme.com/fido-YubiKey-5C"
+    },
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-111111111111",
+    "eventType": "AwsConsoleSignIn",
+    "recipientAccountId": "123456789012"
+  },
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE2",
+      "arn": "arn:aws:iam::123456789012:user/mark.patel@acme.com",
+      "accountId": "123456789012",
+      "accessKeyId": "",
+      "userName": "mark.patel@acme.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "true",
+          "creationDate": "2026-05-05T14:25:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-05-05T14:31:18Z",
+    "eventSource": "signin.amazonaws.com",
+    "eventName": "ConsoleLogin",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "198.51.100.77",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "requestParameters": null,
+    "responseElements": { "ConsoleLogin": "Success" },
+    "additionalEventData": {
+      "LoginTo": "https://console.aws.amazon.com/console/home",
+      "MobileVersion": "No",
+      "MFAUsed": "Yes",
+      "MFAIdentifier": "arn:aws:iam::123456789012:mfa/mark.patel@acme.com"
+    },
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-222222222222",
+    "eventType": "AwsConsoleSignIn",
+    "recipientAccountId": "123456789012"
+  },
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE3",
+      "arn": "arn:aws:iam::123456789012:user/sara.johnson@acme.com",
+      "accountId": "123456789012",
+      "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+      "userName": "sara.johnson@acme.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "true",
+          "creationDate": "2026-05-04T09:00:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-05-04T09:22:47Z",
+    "eventSource": "sts.amazonaws.com",
+    "eventName": "AssumeRole",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "203.0.113.15",
+    "userAgent": "aws-cli/2.13.0 Python/3.11.0 Linux/5.15.0",
+    "requestParameters": {
+      "roleArn": "arn:aws:iam::123456789012:role/AdminRole",
+      "roleSessionName": "sara-admin-session",
+      "durationSeconds": 3600
+    },
+    "responseElements": {
+      "credentials": {
+        "accessKeyId": "ASIAIOSFODNN7EXAMPLE1",
+        "sessionToken": "REDACTED/TOKEN",
+        "expiration": "2026-05-04T13:22:47Z"
+      },
+      "assumedRoleUser": {
+        "assumedRoleId": "AROACKCEVSQ6C2EXAMPLE:sara-admin-session",
+        "arn": "arn:aws:sts::123456789012:assumed-role/AdminRole/sara-admin-session"
+      }
+    },
+    "additionalEventData": {},
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-333333333333",
+    "eventType": "AwsApiCall",
+    "recipientAccountId": "123456789012",
+    "resources": [
+      {
+        "ARN": "arn:aws:iam::123456789012:role/AdminRole",
+        "accountId": "123456789012",
+        "type": "AWS::IAM::Role"
+      }
+    ]
+  },
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE1",
+      "arn": "arn:aws:iam::123456789012:user/jane.chen@acme.com",
+      "accountId": "123456789012",
+      "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+      "userName": "jane.chen@acme.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "true",
+          "creationDate": "2026-05-03T02:28:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-05-03T02:31:55Z",
+    "eventSource": "sts.amazonaws.com",
+    "eventName": "AssumeRole",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "203.0.113.42",
+    "userAgent": "aws-cli/2.13.0 Python/3.11.0 Linux/5.15.0",
+    "requestParameters": {
+      "roleArn": "arn:aws:iam::123456789012:role/AdminRole",
+      "roleSessionName": "jane-emergency-session",
+      "durationSeconds": 3600
+    },
+    "responseElements": {
+      "credentials": {
+        "accessKeyId": "ASIAIOSFODNN7EXAMPLE2",
+        "sessionToken": "REDACTED/TOKEN",
+        "expiration": "2026-05-03T06:31:55Z"
+      },
+      "assumedRoleUser": {
+        "assumedRoleId": "AROACKCEVSQ6C2EXAMPLE:jane-emergency-session",
+        "arn": "arn:aws:sts::123456789012:assumed-role/AdminRole/jane-emergency-session"
+      }
+    },
+    "additionalEventData": {},
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-444444444444",
+    "eventType": "AwsApiCall",
+    "recipientAccountId": "123456789012",
+    "resources": [
+      {
+        "ARN": "arn:aws:iam::123456789012:role/AdminRole",
+        "accountId": "123456789012",
+        "type": "AWS::IAM::Role"
+      }
+    ]
+  },
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE2",
+      "arn": "arn:aws:iam::123456789012:user/mark.patel@acme.com",
+      "accountId": "123456789012",
+      "accessKeyId": "",
+      "userName": "mark.patel@acme.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "false",
+          "creationDate": "2026-05-02T11:00:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-05-02T11:05:22Z",
+    "eventSource": "signin.amazonaws.com",
+    "eventName": "ConsoleLogin",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "198.51.100.77",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "requestParameters": null,
+    "responseElements": { "ConsoleLogin": "Success" },
+    "additionalEventData": {
+      "LoginTo": "https://console.aws.amazon.com/console/home",
+      "MobileVersion": "No",
+      "MFAUsed": "No"
+    },
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-555555555555",
+    "eventType": "AwsConsoleSignIn",
+    "recipientAccountId": "123456789012"
+  },
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE9",
+      "arn": "arn:aws:iam::123456789012:user/contractor.ext@vendor.com",
+      "accountId": "123456789012",
+      "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+      "userName": "contractor.ext@vendor.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "true",
+          "creationDate": "2026-05-01T15:00:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-05-01T15:08:33Z",
+    "eventSource": "sts.amazonaws.com",
+    "eventName": "AssumeRole",
+    "awsRegion": "ap-southeast-1",
+    "sourceIPAddress": "175.45.176.20",
+    "userAgent": "aws-cli/2.13.0 Python/3.11.0 Linux/5.15.0",
+    "requestParameters": {
+      "roleArn": "arn:aws:iam::123456789012:role/AdminRole",
+      "roleSessionName": "contractor-session",
+      "durationSeconds": 3600
+    },
+    "responseElements": {
+      "credentials": {
+        "accessKeyId": "ASIAIOSFODNN7EXAMPLE3",
+        "sessionToken": "REDACTED/TOKEN",
+        "expiration": "2026-05-01T19:08:33Z"
+      },
+      "assumedRoleUser": {
+        "assumedRoleId": "AROACKCEVSQ6C2EXAMPLE:contractor-session",
+        "arn": "arn:aws:sts::123456789012:assumed-role/AdminRole/contractor-session"
+      }
+    },
+    "additionalEventData": {},
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-666666666666",
+    "eventType": "AwsApiCall",
+    "recipientAccountId": "123456789012",
+    "resources": [
+      {
+        "ARN": "arn:aws:iam::123456789012:role/AdminRole",
+        "accountId": "123456789012",
+        "type": "AWS::IAM::Role"
+      }
+    ]
+  },
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE3",
+      "arn": "arn:aws:iam::123456789012:user/sara.johnson@acme.com",
+      "accountId": "123456789012",
+      "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+      "userName": "sara.johnson@acme.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "true",
+          "creationDate": "2026-04-30T10:00:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-04-30T10:45:11Z",
+    "eventSource": "iam.amazonaws.com",
+    "eventName": "AttachRolePolicy",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "203.0.113.15",
+    "userAgent": "aws-cli/2.13.0 Python/3.11.0 Linux/5.15.0",
+    "requestParameters": {
+      "roleName": "DevOpsRole",
+      "policyArn": "arn:aws:iam::aws:policy/AdministratorAccess"
+    },
+    "responseElements": null,
+    "additionalEventData": {},
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-777777777777",
+    "eventType": "AwsApiCall",
+    "recipientAccountId": "123456789012",
+    "resources": [
+      {
+        "ARN": "arn:aws:iam::123456789012:role/DevOpsRole",
+        "accountId": "123456789012",
+        "type": "AWS::IAM::Role"
+      },
+      {
+        "ARN": "arn:aws:iam::aws:policy/AdministratorAccess",
+        "accountId": "aws",
+        "type": "AWS::IAM::ManagedPolicy"
+      }
+    ]
+  },
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE1",
+      "arn": "arn:aws:iam::123456789012:user/jane.chen@acme.com",
+      "accountId": "123456789012",
+      "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+      "userName": "jane.chen@acme.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "true",
+          "creationDate": "2026-05-05T13:00:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-05-05T13:15:09Z",
+    "eventSource": "cloudtrail.amazonaws.com",
+    "eventName": "StopLogging",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "203.0.113.42",
+    "userAgent": "aws-cli/2.13.0 Python/3.11.0 Linux/5.15.0",
+    "requestParameters": {
+      "name": "arn:aws:cloudtrail:us-east-1:123456789012:trail/main-audit-trail"
+    },
+    "responseElements": null,
+    "additionalEventData": {},
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-888888888888",
+    "eventType": "AwsApiCall",
+    "recipientAccountId": "123456789012",
+    "resources": [
+      {
+        "ARN": "arn:aws:cloudtrail:us-east-1:123456789012:trail/main-audit-trail",
+        "accountId": "123456789012",
+        "type": "AWS::CloudTrail::Trail"
+      }
+    ]
+  },
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE2",
+      "arn": "arn:aws:iam::123456789012:user/mark.patel@acme.com",
+      "accountId": "123456789012",
+      "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+      "userName": "mark.patel@acme.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "true",
+          "creationDate": "2026-05-04T11:15:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-05-04T11:33:27Z",
+    "eventSource": "iam.amazonaws.com",
+    "eventName": "CreateAccessKey",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "198.51.100.77",
+    "userAgent": "aws-cli/2.13.0 Python/3.11.0 Linux/5.15.0",
+    "requestParameters": {
+      "userName": "deploy-bot"
+    },
+    "responseElements": {
+      "accessKey": {
+        "accessKeyId": "AKIANEWKEYEXAMPLE123",
+        "status": "Active",
+        "userName": "deploy-bot",
+        "createDate": "2026-05-04T11:33:27Z"
+      }
+    },
+    "additionalEventData": {},
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-999999999999",
+    "eventType": "AwsApiCall",
+    "recipientAccountId": "123456789012",
+    "resources": [
+      {
+        "ARN": "arn:aws:iam::123456789012:user/deploy-bot",
+        "accountId": "123456789012",
+        "type": "AWS::IAM::User"
+      }
+    ]
+  },
+  {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "IAMUser",
+      "principalId": "AIDACKCEVSQ6C2EXAMPLE4",
+      "arn": "arn:aws:iam::123456789012:user/admin@acme.com",
+      "accountId": "123456789012",
+      "accessKeyId": "AKIAIOSFODNN7EXAMPLE",
+      "userName": "admin@acme.com",
+      "sessionContext": {
+        "sessionIssuer": {},
+        "attributes": {
+          "mfaAuthenticated": "true",
+          "creationDate": "2026-05-03T16:00:00Z"
+        }
+      }
+    },
+    "eventTime": "2026-05-03T16:22:44Z",
+    "eventSource": "iam.amazonaws.com",
+    "eventName": "DeleteUser",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "203.0.113.99",
+    "userAgent": "aws-cli/2.13.0 Python/3.11.0 Linux/5.15.0",
+    "requestParameters": {
+      "userName": "former.contractor@vendor.com"
+    },
+    "responseElements": null,
+    "additionalEventData": {},
+    "eventID": "a1b2c3d4-e5f6-7890-abcd-aaaaaaaaaaaa",
+    "eventType": "AwsApiCall",
+    "recipientAccountId": "123456789012",
+    "resources": [
+      {
+        "ARN": "arn:aws:iam::123456789012:user/former.contractor@vendor.com",
+        "accountId": "123456789012",
+        "type": "AWS::IAM::User"
+      }
+    ]
+  }
+]
