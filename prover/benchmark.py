@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+
 from ingest.normalise import normalise_file
 from prover.run_proof import prove_all
 

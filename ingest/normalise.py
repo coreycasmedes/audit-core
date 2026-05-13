@@ -1,7 +1,10 @@
-import json, time, logging
-from datetime import datetime, timezone
+import json
+import logging
+import time
+from datetime import datetime
 from pathlib import Path
-from .schema import ClaimSet, AuthMethod, EventType
+
+from .schema import AuthMethod, ClaimSet
 
 logger = logging.getLogger(__name__)
 

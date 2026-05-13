@@ -1,8 +1,11 @@
-import json, time, logging, os
+import json
+import logging
+import os
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from .normalise import normalise, WATCHED_EVENTS
-from .schema import ClaimSet
+
+from .normalise import WATCHED_EVENTS, normalise
 
 logger = logging.getLogger(__name__)
 

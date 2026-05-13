@@ -1,6 +1,8 @@
-from pydantic import BaseModel
+import hashlib
+import json
 from typing import Literal
-import hashlib, json
+
+from pydantic import BaseModel
 
 AuthMethod = Literal["FIDO2", "TOTP", "PASSWORD", "UNKNOWN"]
 EventType = Literal[
