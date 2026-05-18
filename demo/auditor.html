@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>audit-core — Auditor Report</title>
+<style>
+  :root {
+    --bg: #f6f8fa;
+    --surface: #ffffff;
+    --border: #d0d7de;
+    --border-subtle: #e8ecef;
+    --text: #1f2328;
+    --muted: #656d76;
+    --green: #1a7f37;
+    --green-bg: #dafbe1;
+    --red: #cf222e;
+    --red-bg: #ffebe9;
+    --blue: #0969da;
+    --purple: #6639ba;
+    --accent: #0550ae;
+    --header-bg: #24292f;
+    --header-text: #f0f6fc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; }
+
+  /* ── Header ── */
+  header {
+    background: var(--header-bg); color: var(--header-text);
+    padding: 12px 24px; display: flex; align-items: center; gap: 14px;
+  }
+  .wordmark { font-size: 15px; font-weight: 700; font-family: 'SF Mono', monospace; }
+  .wordmark span { color: #58a6ff; }
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; background: var(--purple); color: #fff; text-transform: uppercase; }
+  .page-title { font-size: 14px; color: #8d96a0; margin-left: 8px; }
+  .ops-link { margin-left: auto; font-size: 13px; color: #8d96a0; text-decoration: none; font-family: 'SF Mono', monospace; }
+  .ops-link:hover { color: #f0f6fc; }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 14px 24px; display: flex; gap: 32px; align-items: center;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+  .stat-value { font-size: 22px; font-weight: 700; color: var(--text); font-family: 'SF Mono', monospace; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.red { color: var(--red); }
+  .stat-divider { width: 1px; background: var(--border); height: 36px; }
+  .contract-chip {
+    margin-left: auto; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 12px; font-size: 12px; font-family: 'SF Mono', monospace;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .contract-chip-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+  .contract-chip-addr { color: var(--accent); }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    padding: 14px 24px; display: flex; align-items: center; gap: 10px;
+    background: var(--bg);
+  }
+  .filter-btn {
+    padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); cursor: pointer; font-size: 13px; color: var(--muted);
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .toolbar-right { margin-left: auto; font-size: 12px; color: var(--muted); }
+  #refresh-btn {
+    padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  #refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Main content ── */
+  .content { padding: 0 24px 24px; max-width: 1400px; }
+
+  /* ── Table ── */
+  .table-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden; margin-top: 16px;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 10px 16px; text-align: left; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted);
+    background: var(--bg); border-bottom: 1px solid var(--border); font-weight: 600;
+  }
+  tbody tr { border-bottom: 1px solid var(--border-subtle); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f3f6f9; }
+  tbody td { padding: 11px 16px; vertical-align: middle; }
+
+  .td-time { color: var(--muted); font-size: 12px; white-space: nowrap; font-family: 'SF Mono', monospace; }
+  .td-event { font-weight: 600; font-size: 13px; }
+  .td-actor { color: var(--muted); font-size: 12px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .td-actor a { color: var(--blue); text-decoration: none; }
+  .td-actor a:hover { text-decoration: underline; }
+
+  .circuits-row { display: flex; gap: 4px; flex-wrap: nowrap; }
+  .circuit-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+    white-space: nowrap; font-family: 'SF Mono', monospace;
+  }
+  .cb-pass { background: var(--green-bg); color: var(--green); }
+  .cb-fail { background: var(--red-bg); color: var(--red); }
+  .cb-pending { background: #f0f0f0; color: #888; }
+
+  .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .pill-pass { background: var(--green-bg); color: var(--green); }
+  .pill-fail { background: var(--red-bg); color: var(--red); }
+  .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .verify-btn {
+    padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); cursor: pointer; font-size: 11px; color: var(--muted);
+    text-decoration: none; display: inline-block;
+  }
+  .verify-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+  .latency { font-size: 12px; color: var(--muted); font-family: 'SF Mono', monospace; }
+
+  /* Empty state */
+  .empty-state {
+    padding: 80px; text-align: center; color: var(--muted);
+    background: var(--surface);
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 14px; }
+  .empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; max-width: 300px; margin: 0 auto; }
+
+  /* Pagination */
+  .pagination { display: flex; gap: 6px; align-items: center; justify-content: flex-end; margin-top: 14px; }
+  .page-btn {
+    padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); cursor: pointer; font-size: 13px;
+  }
+  .page-btn:hover { border-color: var(--accent); }
+  .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .page-info { font-size: 13px; color: var(--muted); margin: 0 8px; }
+
+  /* Violation banner */
+  .violation-banner {
+    background: var(--red-bg); border: 1px solid #ffc1c0;
+    border-radius: 8px; padding: 12px 16px; margin-top: 16px;
+    display: flex; align-items: center; gap: 10px; font-size: 13px;
+  }
+  .violation-banner.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">audit<span>-core</span></div>
+  <div class="badge">POC</div>
+  <div class="page-title">/ Auditor Report</div>
+  <a class="ops-link" href="/">← Operations</a>
+</header>
+
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-label">Total Anchored</div>
+    <div class="stat-value" id="stat-total">—</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat">
+    <div class="stat-label">Pass Rate</div>
+    <div class="stat-value green" id="stat-pass-rate">—</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat">
+    <div class="stat-label">Violations</div>
+    <div class="stat-value red" id="stat-violations">—</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat">
+    <div class="stat-label">Avg Proof Time</div>
+    <div class="stat-value" id="stat-avg-ms">—</div>
+  </div>
+  <div class="contract-chip">
+    <div class="contract-chip-label">Contract</div>
+    <div class="contract-chip-addr" id="contract-addr">mock (deploy pending)</div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="filter-btn active" data-filter="all" onclick="setFilter(this)">All</button>
+  <button class="filter-btn" data-filter="pass" onclick="setFilter(this)">Pass</button>
+  <button class="filter-btn" data-filter="fail" onclick="setFilter(this)">Violations</button>
+  <button id="refresh-btn" onclick="loadRecords()">↻ Refresh</button>
+  <div class="toolbar-right" id="last-updated">Never updated</div>
+</div>
+
+<div class="content">
+  <div class="violation-banner hidden" id="violation-banner">
+    ⚠️ <strong id="violation-count">0</strong> policy violation(s) detected in current view.
+    All failures are cryptographically anchored on HyperEVM.
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Anchored At</th>
+          <th>Event Type</th>
+          <th>Actor</th>
+          <th>Auth</th>
+          <th>Circuits</th>
+          <th>Status</th>
+          <th>Proof Time</th>
+          <th>Verify</th>
+        </tr>
+      </thead>
+      <tbody id="auditor-body">
+        <tr>
+          <td colspan="8">
+            <div class="empty-state">
+              <div class="icon">📋</div>
+              <h3>No records yet</h3>
+              <p>Run scenarios from the operations dashboard to generate anchored audit records.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+const PAGE_SIZE = 20;
+let _allRecords = [];
+let _filter = 'all';
+let _page = 0;
+
+const CIRCUIT_NAMES = ['mfa_check', 'hours_check', 'role_check'];
+const CIRCUIT_LABELS = { 'mfa_check': 'MFA', 'hours_check': 'Hours', 'role_check': 'Role' };
+
+function setFilter(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _filter = btn.dataset.filter;
+  _page = 0;
+  render();
+}
+
+function filtered() {
+  if (_filter === 'pass') return _allRecords.filter(r => r.overall_passed);
+  if (_filter === 'fail') return _allRecords.filter(r => !r.overall_passed);
+  return _allRecords;
+}
+
+function render() {
+  const rows = filtered();
+  const total = rows.length;
+  const start = _page * PAGE_SIZE;
+  const page = rows.slice(start, start + PAGE_SIZE);
+
+  // Stats
+  const allTotal = _allRecords.length;
+  const allPass = _allRecords.filter(r => r.overall_passed).length;
+  const allFail = allTotal - allPass;
+  document.getElementById('stat-total').textContent = allTotal || '—';
+  document.getElementById('stat-pass-rate').textContent = allTotal ? Math.round(allPass / allTotal * 100) + '%' : '—';
+  document.getElementById('stat-violations').textContent = allFail || '—';
+
+  const avgMs = allTotal
+    ? Math.round(_allRecords.reduce((s, r) => s + (r.prove_ms || 0), 0) / allTotal)
+    : null;
+  document.getElementById('stat-avg-ms').textContent = avgMs ? `${avgMs}ms` : '—';
+
+  // Violation banner
+  const banner = document.getElementById('violation-banner');
+  if (allFail > 0) {
+    banner.classList.remove('hidden');
+    document.getElementById('violation-count').textContent = allFail;
+  } else {
+    banner.classList.add('hidden');
+  }
+
+  // Table
+  const tbody = document.getElementById('auditor-body');
+  if (!page.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="icon">📋</div><h3>No records yet</h3><p>Run scenarios from the operations dashboard to generate anchored audit records.</p></div></td></tr>`;
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = page.map(r => {
+    const ts = new Date(r.anchored_at * 1000).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+    const circuits = CIRCUIT_NAMES.map(name => {
+      const c = (r.circuits || []).find(x => x.circuit === name);
+      if (!c) return `<span class="circuit-badge cb-pending">${CIRCUIT_LABELS[name]}</span>`;
+      return `<span class="circuit-badge ${c.passed ? 'cb-pass' : 'cb-fail'}">${CIRCUIT_LABELS[name]}</span>`;
+    }).join('');
+
+    const pill = r.overall_passed
+      ? `<span class="pill pill-pass"><span class="pill-dot"></span>PASS</span>`
+      : `<span class="pill pill-fail"><span class="pill-dot"></span>FAIL</span>`;
+
+    const verifyEl = r.explorer_url
+      ? `<a class="verify-btn" href="${r.explorer_url}" target="_blank">View on chain →</a>`
+      : `<span class="verify-btn" style="opacity:0.5">Pending deploy</span>`;
+
+    return `<tr>
+      <td class="td-time">${ts}</td>
+      <td class="td-event">${r.event_type}</td>
+      <td class="td-actor" title="${r.actor}">${r.actor}</td>
+      <td style="font-size:12px;color:var(--muted)">${r.auth_method || '—'}</td>
+      <td><div class="circuits-row">${circuits}</div></td>
+      <td>${pill}</td>
+      <td class="latency">${r.prove_ms != null ? r.prove_ms + 'ms' : '—'}</td>
+      <td>${verifyEl}</td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const pag = document.getElementById('pagination');
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+  let btns = '';
+  if (_page > 0) btns += `<button class="page-btn" onclick="goPage(${_page-1})">← Prev</button>`;
+  btns += `<span class="page-info">Page ${_page+1} of ${totalPages}</span>`;
+  if (_page < totalPages - 1) btns += `<button class="page-btn" onclick="goPage(${_page+1})">Next →</button>`;
+  pag.innerHTML = btns;
+}
+
+function goPage(p) {
+  _page = p;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function loadRecords() {
+  try {
+    const r = await fetch('/records');
+    _allRecords = await r.json();
+    _page = 0;
+    render();
+    document.getElementById('last-updated').textContent =
+      'Updated ' + new Date().toLocaleTimeString('en-US', { hour12: false });
+  } catch (e) {
+    document.getElementById('last-updated').textContent = 'Failed to load';
+  }
+}
+
+loadRecords();
+setInterval(loadRecords, 10_000);
+</script>
+</body>
+</html>

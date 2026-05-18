@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>audit-core — Operations</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --green: #3fb950;
+    --green-dim: #1a3a22;
+    --red: #f85149;
+    --red-dim: #3a1a1a;
+    --yellow: #d29922;
+    --blue: #388bfd;
+    --purple: #a371f7;
+    --accent: #58a6ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
+
+  /* ── Header ── */
+  header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 24px; border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .wordmark { font-size: 16px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+  .wordmark span { color: var(--accent); }
+  .badge {
+    font-size: 10px; font-weight: 600; padding: 2px 7px;
+    border-radius: 20px; background: var(--purple); color: #fff;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .chain-status { display: flex; align-items: center; gap: 6px; margin-left: auto; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  .dot.offline { background: var(--red); }
+  #block-num { color: var(--accent); }
+  .auditor-link { color: var(--muted); text-decoration: none; margin-left: 16px; font-size: 12px; }
+  .auditor-link:hover { color: var(--text); }
+
+  /* ── Main layout ── */
+  main { display: grid; grid-template-columns: 340px 1fr; gap: 0; height: calc(100vh - 49px); }
+
+  /* ── Left panel ── */
+  .left { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+
+  .panel-title {
+    padding: 14px 18px 10px; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Scenario buttons */
+  .scenarios { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); cursor: pointer; text-align: left;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .btn:hover { border-color: var(--accent); background: #1c2230; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.active { border-color: var(--accent); background: #0d1f3a; }
+  .btn-icon { font-size: 18px; width: 24px; text-align: center; }
+  .btn-text { display: flex; flex-direction: column; gap: 2px; }
+  .btn-label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .btn-desc { font-size: 11px; color: var(--muted); }
+  .btn-expected { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+  .expect-pass { background: var(--green-dim); color: var(--green); }
+  .expect-fail { background: var(--red-dim); color: var(--red); }
+
+  /* Pipeline stages */
+  .pipeline { padding: 14px; }
+  .pipeline-track {
+    display: flex; align-items: center; gap: 0; margin-bottom: 14px;
+  }
+  .stage {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    flex: 1; position: relative;
+  }
+  .stage-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--border); background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; transition: border-color 0.2s, background 0.2s;
+    position: relative; z-index: 1;
+  }
+  .stage-dot.active { border-color: var(--accent); background: #0d1f3a; }
+  .stage-dot.done { border-color: var(--green); background: var(--green-dim); }
+  .stage-dot.failed { border-color: var(--red); background: var(--red-dim); }
+  .stage-name { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stage-connector {
+    flex: 1; height: 2px; background: var(--border); margin-top: -26px;
+    transition: background 0.3s;
+  }
+  .stage-connector.lit { background: var(--green); }
+
+  /* Pulse animation for active stage */
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(88,166,255,0.5); }
+    70% { box-shadow: 0 0 0 8px rgba(88,166,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(88,166,255,0); }
+  }
+  .stage-dot.active { animation: pulse-ring 1.2s ease-out infinite; }
+
+  /* Timing bar */
+  .timing {
+    font-size: 11px; color: var(--muted); padding: 8px 0;
+    border-top: 1px solid var(--border); display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .timing span { white-space: nowrap; }
+  .timing .t-val { color: var(--accent); }
+
+  /* Proof grid */
+  .proof-grid { padding: 0 14px 14px; }
+  .proof-grid-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .proof-cards { display: flex; gap: 8px; }
+  .proof-card {
+    flex: 1; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); transition: all 0.3s;
+  }
+  .proof-card.pass { border-color: var(--green); background: var(--green-dim); }
+  .proof-card.fail { border-color: var(--red); background: var(--red-dim); }
+  @keyframes pop-in {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .proof-card.animated { animation: pop-in 0.25s ease-out; }
+  .proof-card-name { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .proof-card-status { font-size: 18px; }
+  .proof-card-ms { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* Log stream */
+  .log-section { flex: 1; overflow: hidden; display: flex; flex-direction: column; border-top: 1px solid var(--border); }
+  .log-stream {
+    flex: 1; overflow-y: auto; padding: 10px 14px; font-size: 11px;
+    line-height: 1.7; color: var(--muted);
+  }
+  .log-entry { display: flex; gap: 8px; }
+  .log-time { color: var(--border); flex-shrink: 0; }
+  .log-msg.info { color: var(--text); }
+  .log-msg.success { color: var(--green); }
+  .log-msg.error { color: var(--red); }
+  .log-msg.dim { color: var(--muted); }
+
+  /* ── Right panel ── */
+  .right { display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Records table */
+  .records-section { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .records-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .records-header h2 { font-size: 13px; font-weight: 600; }
+  .records-count { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 1px 8px; font-size: 11px; color: var(--muted); }
+  .records-table-wrap { flex: 1; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    position: sticky; top: 0; background: var(--surface);
+    padding: 8px 16px; text-align: left; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted);
+    border-bottom: 1px solid var(--border); font-weight: 600;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td { padding: 10px 16px; vertical-align: middle; }
+  .td-time { color: var(--muted); white-space: nowrap; font-size: 11px; }
+  .td-event { font-weight: 600; }
+  .td-actor { color: var(--muted); font-size: 11px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .circuits-pips { display: flex; gap: 4px; }
+  .pip {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--border); title: '';
+  }
+  .pip.pass { background: var(--green); }
+  .pip.fail { background: var(--red); }
+  .pip.pending { background: var(--yellow); }
+  .status-pill {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+  }
+  .pill-pass { background: var(--green-dim); color: var(--green); }
+  .pill-fail { background: var(--red-dim); color: var(--red); }
+  .tx-link { color: var(--blue); text-decoration: none; font-size: 11px; }
+  .tx-link:hover { text-decoration: underline; }
+  .empty-state { padding: 60px; text-align: center; color: var(--muted); }
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* New row flash */
+  @keyframes row-flash {
+    0% { background: #1a2a3a; }
+    100% { background: transparent; }
+  }
+  .new-row { animation: row-flash 1.5s ease-out; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">audit<span>-core</span></div>
+  <div class="badge">POC</div>
+  <div class="chain-status">
+    <div class="dot" id="chain-dot"></div>
+    <span id="chain-label">HyperEVM testnet</span>
+    <span style="color:var(--border)">·</span>
+    block <span id="block-num">—</span>
+  </div>
+  <a class="auditor-link" href="/auditor">Auditor view →</a>
+</header>
+
+<main>
+  <!-- Left panel -->
+  <div class="left">
+
+    <div class="panel-title">Scenarios</div>
+
+    <div class="scenarios">
+      <button class="btn" data-scenario="pass" onclick="trigger(this)">
+        <span class="btn-icon">✅</span>
+        <span class="btn-text">
+          <span class="btn-label">Compliant login</span>
+          <span class="btn-desc">FIDO2 · approved actor · business hours</span>
+        </span>
+        <span class="btn-expected expect-pass">PASS</span>
+      </button>
+      <button class="btn" data-scenario="fail_mfa" onclick="trigger(this)">
+        <span class="btn-icon">🔑</span>
+        <span class="btn-text">
+          <span class="btn-label">No MFA</span>
+          <span class="btn-desc">Password-only login · mfa_check fails</span>
+        </span>
+        <span class="btn-expected expect-fail">FAIL</span>
+      </button>
+      <button class="btn" data-scenario="fail_hours" onclick="trigger(this)">
+        <span class="btn-icon">🌙</span>
+        <span class="btn-text">
+          <span class="btn-label">Off-hours access</span>
+          <span class="btn-desc">02:31 UTC · hours_check fails</span>
+        </span>
+        <span class="btn-expected expect-fail">FAIL</span>
+      </button>
+      <button class="btn" data-scenario="fail_role" onclick="trigger(this)">
+        <span class="btn-icon">🚫</span>
+        <span class="btn-text">
+          <span class="btn-label">Unauthorised actor</span>
+          <span class="btn-desc">Contractor ARN · role_check fails</span>
+        </span>
+        <span class="btn-expected expect-fail">FAIL</span>
+      </button>
+    </div>
+
+    <div class="pipeline" style="border-top: 1px solid var(--border);">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Pipeline</div>
+      <div class="pipeline-track">
+        <div class="stage" id="stage-ingest">
+          <div class="stage-dot" id="dot-ingest">📥</div>
+          <div class="stage-name">Ingest</div>
+        </div>
+        <div class="stage-connector" id="conn-1"></div>
+        <div class="stage" id="stage-prove">
+          <div class="stage-dot" id="dot-prove">⚡</div>
+          <div class="stage-name">Prove</div>
+        </div>
+        <div class="stage-connector" id="conn-2"></div>
+        <div class="stage" id="stage-anchor">
+          <div class="stage-dot" id="dot-anchor">⛓️</div>
+          <div class="stage-name">Anchor</div>
+        </div>
+        <div class="stage-connector" id="conn-3"></div>
+        <div class="stage" id="stage-live">
+          <div class="stage-dot" id="dot-live">✓</div>
+          <div class="stage-name">Live</div>
+        </div>
+      </div>
+      <div class="timing" id="timing">
+        <span>Waiting for scenario...</span>
+      </div>
+    </div>
+
+    <div class="proof-grid">
+      <div class="proof-grid-title">ZK Circuits</div>
+      <div class="proof-cards">
+        <div class="proof-card" id="card-mfa">
+          <div class="proof-card-name">MFA</div>
+          <div class="proof-card-status" id="icon-mfa">—</div>
+          <div class="proof-card-ms" id="ms-mfa"></div>
+        </div>
+        <div class="proof-card" id="card-hours">
+          <div class="proof-card-name">Hours</div>
+          <div class="proof-card-status" id="icon-hours">—</div>
+          <div class="proof-card-ms" id="ms-hours"></div>
+        </div>
+        <div class="proof-card" id="card-role">
+          <div class="proof-card-name">Role</div>
+          <div class="proof-card-status" id="icon-role">—</div>
+          <div class="proof-card-ms" id="ms-role"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-section">
+      <div class="panel-title" style="border-top:1px solid var(--border);">Event log</div>
+      <div class="log-stream" id="log"></div>
+    </div>
+
+  </div>
+
+  <!-- Right panel -->
+  <div class="right">
+    <div class="records-section">
+      <div class="records-header">
+        <h2>Anchored Records</h2>
+        <span class="records-count" id="rec-count">0</span>
+      </div>
+      <div class="records-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Event</th>
+              <th>Actor</th>
+              <th>Circuits</th>
+              <th>Status</th>
+              <th>TX</th>
+              <th>ms</th>
+            </tr>
+          </thead>
+          <tbody id="records-body">
+            <tr>
+              <td colspan="7" class="empty-state">
+                <div class="icon">🔒</div>
+                <div>No records anchored yet — run a scenario</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+let _running = false;
+let _timings = {};
+let _t0 = null;
+
+function log(msg, cls = 'dim') {
+  const el = document.getElementById('log');
+  const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<span class="log-time">${now}</span><span class="log-msg ${cls}">${msg}</span>`;
+  el.appendChild(entry);
+  el.scrollTop = el.scrollHeight;
+}
+
+function resetPipeline() {
+  ['ingest','prove','anchor','live'].forEach(s => {
+    const d = document.getElementById(`dot-${s}`);
+    d.className = 'stage-dot';
+  });
+  ['conn-1','conn-2','conn-3'].forEach(id => {
+    document.getElementById(id).className = 'stage-connector';
+  });
+  document.getElementById('timing').innerHTML = '<span>Running...</span>';
+  ['mfa','hours','role'].forEach(c => {
+    const card = document.getElementById(`card-${c}`);
+    card.className = 'proof-card';
+    document.getElementById(`icon-${c}`).textContent = '—';
+    document.getElementById(`ms-${c}`).textContent = '';
+  });
+  _timings = {};
+  _t0 = Date.now();
+}
+
+function setStage(name, state) {
+  const d = document.getElementById(`dot-${name}`);
+  d.className = `stage-dot ${state}`;
+}
+
+function litConn(idx) {
+  document.getElementById(`conn-${idx}`).className = 'stage-connector lit';
+}
+
+function updateTiming() {
+  const parts = [];
+  if (_timings.ingest !== undefined) parts.push(`Ingest: <span class="t-val">${_timings.ingest}ms</span>`);
+  if (_timings.prove !== undefined) parts.push(`Prove: <span class="t-val">${_timings.prove}ms</span>`);
+  if (_timings.anchor !== undefined) parts.push(`Anchor: <span class="t-val">~${_timings.anchor}ms</span>`);
+  if (_timings.total !== undefined) parts.push(`Total: <span class="t-val">${_timings.total}ms</span>`);
+  document.getElementById('timing').innerHTML = parts.join(' · ');
+}
+
+const CIRCUIT_ORDER = ['mfa_check', 'hours_check', 'role_check'];
+const CIRCUIT_KEY = { 'mfa_check': 'mfa', 'hours_check': 'hours', 'role_check': 'role' };
+
+function updateCircuits(circuits) {
+  circuits.forEach(c => {
+    const key = CIRCUIT_KEY[c.circuit];
+    if (!key) return;
+    const card = document.getElementById(`card-${key}`);
+    card.classList.remove('pass', 'fail', 'animated');
+    void card.offsetWidth; // reflow
+    card.classList.add(c.passed ? 'pass' : 'fail', 'animated');
+    document.getElementById(`icon-${key}`).textContent = c.passed ? '✓' : '✗';
+    document.getElementById(`ms-${key}`).textContent = `${c.latency_ms}ms`;
+  });
+}
+
+function renderRecords(records) {
+  const tbody = document.getElementById('records-body');
+  if (!records.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="icon">🔒</div><div>No records anchored yet — run a scenario</div></td></tr>`;
+    document.getElementById('rec-count').textContent = '0';
+    return;
+  }
+  document.getElementById('rec-count').textContent = records.length;
+  const circuitNames = ['mfa_check', 'hours_check', 'role_check'];
+  tbody.innerHTML = records.map((r, i) => {
+    const t = new Date(r.anchored_at * 1000).toLocaleTimeString('en-US', { hour12: false });
+    const pips = circuitNames.map(name => {
+      const circ = (r.circuits || []).find(c => c.circuit === name);
+      const cls = circ ? (circ.passed ? 'pass' : 'fail') : 'pending';
+      return `<div class="pip ${cls}" title="${name}: ${cls}"></div>`;
+    }).join('');
+    const pill = r.overall_passed
+      ? `<span class="status-pill pill-pass">PASS</span>`
+      : `<span class="status-pill pill-fail">FAIL</span>`;
+    const txShort = r.tx_hash ? r.tx_hash.slice(0, 10) + '...' : '—';
+    const txEl = r.explorer_url
+      ? `<a class="tx-link" href="${r.explorer_url}" target="_blank">${txShort}</a>`
+      : txShort;
+    return `<tr class="${i === 0 ? 'new-row' : ''}">
+      <td class="td-time">${t}</td>
+      <td class="td-event">${r.event_type}</td>
+      <td class="td-actor" title="${r.actor}">${r.actor}</td>
+      <td><div class="circuits-pips">${pips}</div></td>
+      <td>${pill}</td>
+      <td>${txEl}</td>
+      <td style="color:var(--muted)">${r.total_ms}ms</td>
+    </tr>`;
+  }).join('');
+}
+
+async function trigger(btn) {
+  if (_running) return;
+  _running = true;
+  document.querySelectorAll('.btn').forEach(b => { b.disabled = true; b.classList.remove('active'); });
+  btn.classList.add('active');
+
+  const scenario = btn.dataset.scenario;
+  log(`Triggering scenario: ${scenario}`, 'info');
+  resetPipeline();
+
+  try {
+    const resp = await fetch('/demo/trigger', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenario }),
+    });
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+
+    setStage('ingest', 'active');
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+
+      const chunks = buf.split('\n\n');
+      buf = chunks.pop();
+
+      for (const chunk of chunks) {
+        if (!chunk.trim()) continue;
+        const lines = chunk.split('\n');
+        let eventName = '', dataStr = '';
+        for (const line of lines) {
+          if (line.startsWith('event: ')) eventName = line.slice(7).trim();
+          if (line.startsWith('data: ')) dataStr = line.slice(6).trim();
+        }
+        if (!eventName || !dataStr) continue;
+        let data;
+        try { data = JSON.parse(dataStr); } catch { continue; }
+
+        switch (eventName) {
+          case 'start':
+            setStage('ingest', 'active');
+            log(`Event: ${data.event_type} · ${data.actor} · ${data.auth_method}`, 'info');
+            break;
+          case 'normalised':
+            setStage('ingest', 'done');
+            litConn(1);
+            setStage('prove', 'active');
+            _timings.ingest = data.ingest_ms;
+            updateTiming();
+            log(`Normalised — mfa_used=${data.mfa_used} is_human=${data.is_human}`, 'dim');
+            log('Generating ZK proofs...', 'info');
+            break;
+          case 'proved':
+            setStage('prove', 'done');
+            litConn(2);
+            setStage('anchor', 'active');
+            _timings.prove = data.prove_ms;
+            updateTiming();
+            updateCircuits(data.circuits);
+            const allPass = data.overall_passed;
+            log(`Proved — overall: ${allPass ? 'PASS' : 'FAIL'}`, allPass ? 'success' : 'error');
+            data.circuits.forEach(c => {
+              log(`  ${c.circuit}: ${c.passed ? 'PASS' : 'FAIL'} (${c.latency_ms}ms, ${c.proof_len}B)`, c.passed ? 'dim' : 'error');
+            });
+            break;
+          case 'anchored':
+            setStage('anchor', 'done');
+            litConn(3);
+            setStage('live', 'done');
+            _timings.anchor = data.anchor_ms;
+            updateTiming();
+            log(`Anchored — block ${data.block} · gas $${data.gas_cost_usd}`, 'success');
+            log(`TX: ${data.tx_hash.slice(0,18)}...`, 'dim');
+            break;
+          case 'complete':
+            _timings.total = data.total_ms;
+            updateTiming();
+            log(`Complete — total ${data.total_ms}ms`, 'success');
+            // Refresh records table
+            fetch('/records').then(r => r.json()).then(renderRecords);
+            break;
+          case 'error':
+            log(`Error: ${data.message}`, 'error');
+            break;
+        }
+      }
+    }
+  } catch (e) {
+    log(`Request failed: ${e.message}`, 'error');
+  } finally {
+    _running = false;
+    document.querySelectorAll('.btn').forEach(b => { b.disabled = false; });
+    btn.classList.remove('active');
+  }
+}
+
+// Health check
+async function checkHealth() {
+  try {
+    const r = await fetch('/health');
+    const d = await r.json();
+    document.getElementById('chain-dot').className = 'dot';
+    document.getElementById('chain-label').textContent = 'HyperEVM testnet (mock)';
+    document.getElementById('block-num').textContent = d.claims_loaded + ' claims';
+  } catch {
+    document.getElementById('chain-dot').className = 'dot offline';
+  }
+}
+
+// Load existing records on page load
+fetch('/records').then(r => r.json()).then(renderRecords).catch(() => {});
+checkHealth();
+</script>
+</body>
+</html>
