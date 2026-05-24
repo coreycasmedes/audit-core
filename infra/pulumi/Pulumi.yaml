@@ -1,0 +1,12 @@
+name: audit-core-infra
+runtime: python
+description: Provision AWS CloudTrail + IAM reader for audit-core
+
+config:
+  org_name:
+    description: Short identifier used in resource names (e.g. "acme")
+  aws:region:
+    default: us-east-1
+  enable_cloudtrail:
+    default: "true"
+    description: Create a new CloudTrail trail. Set "false" if one already exists.
